@@ -17,8 +17,11 @@ We are using poetry to manage the projects dependencies.
 
 2. Get the code:    
 Clone this project    
-   ```
-   git clone still_missing
+   ```bash
+   # with https   
+   git clone https://github.com/tutorials-4newbies/holocene_extinction_game.git
+   # with ssh
+   git clone git@github.com:tutorials-4newbies/holocene_extinction_game.git
    ```
    
 
