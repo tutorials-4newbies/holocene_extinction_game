@@ -1,4 +1,10 @@
 # What is this
+A tribute to the Extinctathon game as described in [Orxy and Crake](https://www.oryxandcrake.co.uk/)
+
+>Adam named the living animals, MaddAddam names the dead ones
+
+You can read more about the current ongoing Holocene extinction, that might be rightly called the 
+[anthropocene extinction](https://storymaps.arcgis.com/stories/73ab69fedac54685ae837562e3389d13)
 
 ## Technology
 
