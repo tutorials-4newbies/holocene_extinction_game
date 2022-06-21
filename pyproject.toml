@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "holocene-extinction-game"
+version = "0.1.0"
+description = ""
+authors = []
+
+[tool.poetry.dependencies]
+python = "^3.8"
+Django = "^3.2"
+django-configurations = "^2.2"
+dj-database-url = "^0.5.0"
+djangorestframework = "^3.12.4"
+django-filter = "^2.4.0"
+django-extensions = "^3.1.2"
+django-import-export = "^2.5.0"
+django-storages = "^1.11.1"
+Pillow = "^8.2.0"
+django-cors-headers = "^3.7.0"
+django-querycount = "^0.7.0"
+gunicorn = "^20.1.0"
+djangorestframework-simplejwt = "^4.7.2"
+psycopg2 = "^2.8.6"
+drf-nested-routers = "^0.93.3"
+drf-spectacular = "^0.15.1"
+boto3 = ">=1.4.4"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.3"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

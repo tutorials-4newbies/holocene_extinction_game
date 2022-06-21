@@ -1,0 +1,60 @@
+version: "3"
+
+services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx_holocene_extinction_game
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./nginx_compose:/etc/nginx/conf.d
+      - ./data/static:/static
+      - ./data/media:/media
+    depends_on:
+      - web
+  db:
+    image: postgres:13
+    container_name: postgres_holocene_extinction_game
+    environment:
+      - POSTGRES_DB=holocene_extinction_game_db
+      - POSTGRES_USER=holocene_extinction_game_user
+      - POSTGRES_PASSWORD=holocene_extinction_game_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+  web:
+    build:
+      context: .
+      dockerfile: ./ecs/Dockerfile
+
+    environment:
+      - DJANGO_ALLOWED_HOSTS=web,localhost,127.0.0.1
+      - DJANGO_CONFIGURATION=Development
+      - DJANGO_MEDIA_ROOT=/media/
+      - DJANGO_SETTINGS_MODULE=holocene_extinction_game.settings
+      - DATABASE_URL=postgresql://holocene_extinction_game_user:holocene_extinction_game_pass@db/holocene_extinction_game_db
+    command:
+      - bash
+      - -c
+      - |
+        python manage.py migrate
+        python manage.py createsuperuser --username admin --email admin@admin.com --noinput && cat <<-000 | python manage.py shell
+        from django.contrib.auth import get_user_model
+        admin = get_user_model().objects.get(username='admin')
+        admin.set_password('admin')
+        admin.save()
+        print('Superuser password updated successfully.')
+        000
+        cp /srv/app/static/* -r /static/
+        gunicorn holocene_extinction_game.wsgi --timeout 180 --bind 0.0.0.0
+
+    volumes:
+      - ./data/static:/static
+      - ./data/media:/media
+
+    expose:
+      - "8000"
+
+    depends_on:
+      - db
