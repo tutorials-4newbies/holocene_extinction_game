@@ -13,3 +13,4 @@ __pycache__
 /scanned_results
 /created_files
 /data
+*.db
