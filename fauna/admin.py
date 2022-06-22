@@ -7,7 +7,7 @@ from django.conf import settings
 
 
 class AnimalAdmin(ImportExportMixin, admin.ModelAdmin):
-    list_display = ['name', 'extinction', 'period', 'taxonomy_class', 'taxonomy_class', 'taxonomy_family']
+    list_display = ['name', 'extinction', 'period', 'taxonomy_class', 'taxonomy_order', 'taxonomy_family']
     list_filter = ['period']
     search_fields = ['name']
     list_editable = ['extinction']

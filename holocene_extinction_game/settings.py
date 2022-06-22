@@ -172,7 +172,7 @@ class Development(Base):
     ALLOWED_HOSTS = values.ListValue(["web", "localhost", "127.0.0.1"])
 
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-    PERIOD = 'JURASSIC'
+    # PERIOD = 'JURASSIC'
 
 
 
