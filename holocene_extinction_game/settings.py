@@ -47,7 +47,7 @@ class Base(Configuration):
         'django.contrib.messages',
         'django.contrib.staticfiles',
     ]
-    HOLOCENE_EXTINCTION_GAME_APPS = []
+    HOLOCENE_EXTINCTION_GAME_APPS = ["fauna"]
     INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + HOLOCENE_EXTINCTION_GAME_APPS
 
     MIDDLEWARE = [
@@ -99,7 +99,8 @@ class Base(Configuration):
     # Database
     # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
-    DATABASES = values.DatabaseURLValue('postgresql://holocene_extinction_game_user:holocene_extinction_game_pass@127.0.0.1:5432/holocene_extinction_game_db')
+    # DATABASES = values.DatabaseURLValue('postgresql://holocene_extinction_game_user:holocene_extinction_game_pass@127.0.0.1:5432/holocene_extinction_game_db')
+    DATABASES = values.DatabaseURLValue('sqlite:///holocene_extinction_game.db')
 
     # Password validation
     # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
