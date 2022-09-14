@@ -27,6 +27,7 @@ urlpatterns = [
     path('health_check', views.healthcheck, name='healthcheck'),
     path('api-token-auth/', TokenObtainPairView.as_view(), name='api-token-obtain-pair'),
     path('api-token-refresh/', TokenRefreshView.as_view(), name='api-token-refresh'),
+    path('/api/fauna', include("fauna.urls"))
 ]
 
 configuration_name = settings.CONFIGURATION.split(".")[-1]

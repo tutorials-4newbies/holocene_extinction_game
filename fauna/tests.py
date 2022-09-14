@@ -14,4 +14,4 @@ class AnimalTestCase(APITestCase):
     def test_get_empty_list_of_animals_on_endpoint(self):
         res = self.client.get(reverse("animals-list"))
         self.assertEqual(status.HTTP_200_OK, res.status_code)
-        self.assertEqual(len(res.data), 0)
+        self.assertEqual(len(res.data["results"]), 0)
