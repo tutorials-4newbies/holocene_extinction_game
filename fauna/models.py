@@ -2,19 +2,12 @@ from django.db import models
 
 
 # Create your models here.
+from fauna.choices import PERIOD_CHOICES
+
 
 class Animal(models.Model):
-    PERIOD_CHOICES = [
-        ("PERMIAN", 'Permian'),
-        ("TRIASSIC", 'Triassic'),
-        ("JURASSIC", 'Jurassic'),
-        ("CRETACEOUS", 'Cretaceous'),
-        ("PALEOGENE", 'Paleogene'),
-        ("NEOGENE", 'Neogene'),
-        ("QUATERNARY", 'Quaternary'),
-    ]
 
-    name = models.CharField(max_length=50, blank=False, null=False)
+    name = models.CharField(max_length=50, blank=False, null=False, verbose_name="The name she is called")
     extinction = models.CharField(max_length=50, blank=False, null=False)
     period = models.CharField(max_length=50, blank=False, null=False, choices=PERIOD_CHOICES)
     taxonomy_class = models.CharField(max_length=50, blank=False, null=False)
