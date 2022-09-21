@@ -4,6 +4,7 @@ from django.db import models
 # Create your models here.
 
 class Animal(models.Model):
+
     PERIOD_CHOICES = [
         ("PERMIAN", 'Permian'),
         ("TRIASSIC", 'Triassic'),

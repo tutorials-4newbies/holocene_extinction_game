@@ -104,6 +104,7 @@ class Base(Configuration):
 
     # Password validation
     # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
+    # ACCEPTED_PERIOD = "PERMIAN"
 
     AUTH_PASSWORD_VALIDATORS = [
         {
