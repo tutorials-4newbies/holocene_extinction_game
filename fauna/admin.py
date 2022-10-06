@@ -1,10 +1,12 @@
 from django.contrib import admin, messages
+from import_export.admin import ImportExportModelAdmin
 
 # Register your models here.
 from fauna.models import Animal
 from django.conf import settings
 
-class AnimalAdmin(admin.ModelAdmin):
+
+class AnimalAdmin(ImportExportModelAdmin):
     list_display = ['name', 'extinction', 'period', 'taxonomy_class', 'taxonomy_class', 'taxonomy_family']
     list_filter = ['period']
     search_fields = ['name']
