@@ -1,6 +1,7 @@
 from django.shortcuts import render
+from rest_framework import mixins
 from rest_framework.permissions import AllowAny
-from rest_framework.viewsets import ReadOnlyModelViewSet
+from rest_framework.viewsets import ReadOnlyModelViewSet, GenericViewSet
 # Create your views here.
 from fauna.models import Animal
 from fauna.serializers import AnimalSerializer
