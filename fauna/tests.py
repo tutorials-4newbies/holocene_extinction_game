@@ -42,4 +42,4 @@ class AnimalViewTestCase(APITestCase):
 
     def given_animal_exists(self, animal_param: Dict[str, str]):
         obj, created = Animal.objects.get_or_create(**animal_param)
-        pass
+        return obj
