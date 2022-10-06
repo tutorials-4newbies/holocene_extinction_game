@@ -7,3 +7,9 @@ class AnimalSerializer(serializers.ModelSerializer):
     class Meta:
         model = Animal
         fields = "__all__"
+
+
+class AnonymousAnimalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Animal
+        fields = ['name', 'period']
