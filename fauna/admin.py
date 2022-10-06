@@ -1,10 +1,13 @@
+import import_export.admin
 from django.contrib import admin, messages
 
 # Register your models here.
 from fauna.models import Animal
 from django.conf import settings
+import import_export
 
-class AnimalAdmin(admin.ModelAdmin):
+
+class AnimalAdmin(import_export.admin.ImportExportModelAdmin):
     list_display = ['name', 'extinction', 'period', 'taxonomy_class', 'taxonomy_class', 'taxonomy_family']
     list_filter = ['period']
     search_fields = ['name']
@@ -27,5 +30,6 @@ class AnimalAdmin(admin.ModelAdmin):
                 changed = True
         if changed:
             self.message_user(request=request, message="promoted!", level=messages.WARNING)
+
 
 admin.site.register(Animal, AnimalAdmin)

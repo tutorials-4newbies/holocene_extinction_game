@@ -6,4 +6,16 @@ from fauna.models import Animal
 class AnimalSerializer(serializers.ModelSerializer):
     class Meta:
         model = Animal
-        fields = "__all__"
+        fields = [
+            "name",
+            "extinction",
+            "period",
+            "taxonomy_class",
+            "taxonomy_order",
+            "taxonomy_family"
+        ]
+
+class AnonymosUsesrAnimalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Animal
+        fields = ["name", "period"]
