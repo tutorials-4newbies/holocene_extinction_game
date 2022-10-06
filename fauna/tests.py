@@ -45,6 +45,13 @@ class AnimalViewTestCase(APITestCase):
 
         self.assertEqual(first_animal["name"], "carrier pigeon")
 
+    def test_authenticated_user_gets_full_animal_list(self):
+        # add user via User.objects.create_user
+        # Get a token from the token endpont
+        # Add it to the requests by self.client.headers
+        # verify you're gettign full animal properties
+        pass
+
     def given_animal_exists(self, animal_params:Dict[str, str]):
         obj, created = Animal.objects.get_or_create(**animal_params)
         return obj

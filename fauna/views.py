@@ -11,3 +11,7 @@ class AnimalViewSet(ReadOnlyModelViewSet):
     queryset = Animal.objects.all()
     permission_classes = [AllowAny]
     serializer_class = AnimalSerializer
+
+    # Add filters by django-filters rest framework integration or by overriding a queryset
+
+    # Override get_serialzier_class to choose by class by request.user.is_authenticated
