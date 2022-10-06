@@ -71,11 +71,6 @@ class AnimalViewTestCase(APITestCase):
         self.assertEqual(res.data["count"], 1)
 
     def test_authenticated_users_see_all_fields(self):
-        # Create user
-        # Create Animal
-        # get animal and verify it has period and doesnt have taxonomy family
-        # login
-        # get with authenticated user animal and verify has both
         self.given_user_exists(username="test_user", email="test@test.com", password="test_password")
         animal_params = dict(period=Animal.PERIOD_CHOICES[6][0],
                              extinction="Oh no",
