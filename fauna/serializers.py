@@ -10,3 +10,7 @@ class AnimalSerializer(serializers.ModelSerializer):
 
 
 # Add an anonymous user serialzier with a limited list of fields
+class AnonymousUserAnimalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Animal
+        fields = ['name', 'period', 'extinction']
