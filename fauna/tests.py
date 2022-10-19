@@ -1,3 +1,4 @@
+import json
 from typing import Dict
 
 from django.contrib.auth.models import User
@@ -19,12 +20,7 @@ class AnimalViewTestCase(APITestCase):
         super().tearDown()
 
     def test_animal_endpoint_returns_empty_list(self):
-        target_url = reverse("animals-list")
-        print(target_url)
-        res = self.client.get(target_url)
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertIn("results", res.data)
-        self.assertEqual(len(res.data["results"]), 0)
+        self.verify_expected_animal_count(0)
 
     def test_animal_endpoint_returns_actual_animals(self):
         animal_params = dict(period=Animal.PERIOD_CHOICES[6][0],
@@ -35,16 +31,12 @@ class AnimalViewTestCase(APITestCase):
                              taxonomy_family="Columbidae")
         # Arrange, Act, Assert == Given, When, Then
         self.given_animal_exists(animal_params)
-        target_url = reverse("animals-list")
-        print(target_url)
-        res = self.client.get(target_url)
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertIn("results", res.data)
-        self.assertEqual(len(res.data["results"]), 1)
-        self.assertEqual(res.data["count"], 1)
-        first_animal = res.data["results"][0]
+        res = self.verify_expected_animal_count(1)
 
-        self.assertEqual(first_animal["name"], "carrier pigeon")
+        first_animal = res.data["results"][0]
+        for key in first_animal.keys():
+            self.assertEqual(first_animal[key], animal_params[key])
+
 
     def test_animal_endpoints_returns_results_filtered_by_period(self):
         animal_params = dict(period=Animal.PERIOD_CHOICES[6][0],
@@ -67,11 +59,8 @@ class AnimalViewTestCase(APITestCase):
 
         target_url = reverse("animals-list")
 
-        res = self.client.get(f"{target_url}?period={Animal.PERIOD_CHOICES[5][0]}")
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertIn("results", res.data)
-        self.assertEqual(len(res.data["results"]), 1)
-        self.assertEqual(res.data["count"], 1)
+        query_params = dict(period=Animal.PERIOD_CHOICES[5][0])
+        res = self.verify_expected_animal_count(1, query_params=query_params)
         first_animal = res.data["results"][0]
         self.assertEqual(first_animal["name"], "T-rex")
         self.assertNotIn("taxonomy_family", first_animal)
@@ -97,20 +86,80 @@ class AnimalViewTestCase(APITestCase):
 
         target_url = reverse("animals-list")
 
-        res = self.client.get(f"{target_url}")
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertIn("results", res.data)
-        self.assertEqual(len(res.data["results"]), 1)
-        self.assertEqual(res.data["count"], 1)
+        res = self.verify_expected_animal_count(1)
         first_animal = res.data["results"][0]
         self.assertIn("taxonomy_family", first_animal)
 
+    def test_anonymous_user_cant_create_animal(self):
+        self.verify_expected_animal_count(0)
+        animal_params = dict(period=Animal.PERIOD_CHOICES[5][0],
+                             extinction="K/t",
+                             name="T-rex",
+                             taxonomy_class="Dinsourses",
+                             taxonomy_order="Thripods",
+                             taxonomy_family="Rex"
+                             )
 
-    def given_animal_exists(self, animal_params:Dict[str, str]) -> Animal:
+        target_url = reverse("animals-list")
+        res = self.client.post(target_url, data=json.dumps(animal_params), content_type="application/json")
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_authenticated_users_can_create_animal(self):
+        self.verify_expected_animal_count(0)
+
+        user = dict(
+            username="test_user",
+            email="test@example.com",
+            password="12345"
+        )
+        self.given_user_exists(username=user["username"], email=user["email"], password=user["password"])
+        self.given_user_authenticate(username=user["username"], password=user["password"])
+
+        animal_params = dict(period=Animal.PERIOD_CHOICES[5][0],
+                             extinction="K/t",
+                             name="T-rex",
+                             taxonomy_class="Dinsourses",
+                             taxonomy_order="Thripods",
+                             taxonomy_family="Rex"
+                             )
+
+        target_url = reverse("animals-list")
+        res = self.client.post(target_url, data=json.dumps(animal_params), content_type="application/json")
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+        res = self.verify_expected_animal_count(1)
+
+        first_animal = res.data["results"][0]
+        for key in first_animal.keys():
+            self.assertEqual(first_animal[key], animal_params[key])
+
+    def given_animal_exists(self, animal_params: Dict[str, str]) -> Animal:
         obj, created = Animal.objects.get_or_create(**animal_params)
         return obj
 
-    def given_user_exists(self, username, email, password)-> User:
+    def given_user_exists(self, username, email, password) -> User:
         obj = User.objects.create_user(username=username, email=email, password=password)
 
         return obj
+
+    def verify_expected_animal_count(self, expected_count: int, query_params={}):
+        target_url = reverse("animals-list")
+
+        if query_params:
+            query_string = ""
+            for param_key in query_params.keys():
+                query_string += f"{param_key}={query_params[param_key]}&"
+            query_string = query_string[:-1]
+            res = self.client.get(f"{target_url}?{query_string}")
+        else:
+            res = self.client.get(target_url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn("results", res.data)
+        self.assertEqual(len(res.data["results"]), expected_count)
+        return res
+
+    def given_user_authenticate(self, username, password):
+        auth_url = reverse("api-token-obtain-pair")
+        res = self.client.post(auth_url, data=dict(username=username, password=password))
+        access_token = res.data["access"]
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + access_token)
