@@ -130,6 +130,48 @@ class AnimalViewTestCase(APITestCase):
         res = self.client.post(target_url, data=json.dumps(animal), content_type="application/json")
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.verify_expected_animal_count(1)
+        delete_target_url = reverse("animals-detail", args=[res.data["id"]])
+        # /api/fauna/animals/1/
+        res = self.client.delete(delete_target_url)
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        self.verify_expected_animal_count(0)
+
+    def test_delete_only_possible_for_creator_or_admin(self):
+        target_url = reverse("animals-list")
+        animal = dict(period=Animal.PERIOD_CHOICES[5][0],
+                      extinction="K/t",
+                      name="T-rex",
+                      taxonomy_class="Dinsourses",
+                      taxonomy_order="Thripods",
+                      taxonomy_family="Rex")
+        first_user = self.given_user_exists(username="test_user", email="test@example.com", password="12345")
+        second_user = self.given_user_exists(username="second_user", email="second@example.com", password="12345")
+
+        # Now authenticate and create animal as first user
+        self.given_user_authenticated("test_user", "12345")
+
+        res = self.client.post(target_url, data=json.dumps(animal), content_type="application/json")
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.verify_expected_animal_count(1)
+
+        # switch users
+        self.given_user_authenticated("second_user", "12345")
+
+        # Verify animal deletion failed for second user
+        delete_target_url = reverse("animals-detail", args=[res.data["id"]])
+        # /api/fauna/animals/1/
+        res = self.client.delete(delete_target_url)
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+        self.verify_expected_animal_count(1)
+        # Now for the prestige part, we'll switch users
+        self.given_user_authenticated("test_user", "12345")
+        res = self.client.delete(delete_target_url)
+
+        # And see the animal deleted
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        self.verify_expected_animal_count(0)
+
     def given_user_authenticated(self, username, password):
         auth_url = reverse("api-token-obtain-pair")
         res = self.client.post(auth_url, data=dict(username=username, password=password))
