@@ -1,3 +1,4 @@
+import json
 from typing import Dict
 
 from django.contrib.auth.models import User
@@ -105,12 +106,50 @@ class AnimalViewTestCase(APITestCase):
         first_animal = res.data["results"][0]
         self.assertIn("taxonomy_family", first_animal)
 
+    def test_authenticated_user_can_create(self):
+        # check animal not exists
+        # try to create
+        # check not exists
+        # create user and authenticate
+        # try to create
+        # check animal exists
+        self.verify_expected_animal_count(0)
+        target_url = reverse("animals-list")
+        animal = dict(period=Animal.PERIOD_CHOICES[5][0],
+                      extinction="K/t",
+                      name="T-rex",
+                      taxonomy_class="Dinsourses",
+                      taxonomy_order="Thripods",
+                      taxonomy_family="Rex")
+        res = self.client.post(target_url, data=json.dumps(animal), content_type="application/json")
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    def given_animal_exists(self, animal_params:Dict[str, str]) -> Animal:
+        self.given_user_exists(username="test_user", email="test@example.com", password="12345")
+        self.given_user_authenticated("test_user", "12345")
+
+        res = self.client.post(target_url, data=json.dumps(animal), content_type="application/json")
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.verify_expected_animal_count(1)
+    def given_user_authenticated(self, username, password):
+        auth_url = reverse("api-token-obtain-pair")
+        res = self.client.post(auth_url, data=dict(username=username, password=password))
+        access_token = res.data["access"]
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + access_token)
+
+    def verify_expected_animal_count(self, expected_count: int):
+        target_url = reverse("animals-list")
+
+        res = self.client.get(f"{target_url}")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn("results", res.data)
+        self.assertEqual(len(res.data["results"]), expected_count)
+
+    def given_animal_exists(self, animal_params: Dict[str, str]) -> Animal:
         obj, created = Animal.objects.get_or_create(**animal_params)
+
         return obj
 
-    def given_user_exists(self, username, email, password)-> User:
+    def given_user_exists(self, username, email, password) -> User:
         obj = User.objects.create_user(username=username, email=email, password=password)
 
         return obj
