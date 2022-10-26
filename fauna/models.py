@@ -25,7 +25,7 @@ class Animal(models.Model):
     taxonomy_class = models.CharField(max_length=50, blank=False, null=False)
     taxonomy_order = models.CharField(max_length=50, blank=False, null=False)
     taxonomy_family = models.CharField(max_length=50, blank=False, null=False)
-    creator = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, on_delete=CASCADE)
+    creator = models.ForeignKey(settings.AUTH_USER_MODEL, blank=False, null=False, on_delete=CASCADE)
 
     def __str__(self):
         return f"{self.name} of {self.taxonomy_family}"

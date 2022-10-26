@@ -1,11 +1,18 @@
-from rest_framework.permissions import BasePermission
+from rest_framework.permissions import BasePermission, IsAuthenticatedOrReadOnly, SAFE_METHODS
 
 
-class IsAuthenticatedOrReadOnly(BasePermission):
+class IsCreatorMutatingOrReadOnly(IsAuthenticatedOrReadOnly):
     """
     Allows access only to authenticated users.
     """
 
-    def has_permission(self, request, view):
+    def has_object_permission(self, request, view, obj):
+        """
+        Return `True` if permission is granted, `False` otherwise.
+        obj is the object we're accessing, probably the Animal
 
-        return bool(request.user and request.user.is_authenticated)
+        """
+        return (
+                request.method in SAFE_METHODS or
+                (request.user and request.user.is_authenticated and request.user == obj.creator)
+        )

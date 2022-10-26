@@ -1,17 +1,21 @@
+import copy
+
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import render
-from rest_framework import mixins
+from rest_framework import mixins, status
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework.filters import SearchFilter
+from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 # Create your views here.
 from fauna.models import Animal
+from fauna.permissions import IsCreatorMutatingOrReadOnly
 from fauna.serializers import AnimalSerializer, AnonymousUserAnimalSerializer
 
 
 class AnimalViewSet(ModelViewSet):
     queryset = Animal.objects.all()
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsCreatorMutatingOrReadOnly]
     serializer_class = AnonymousUserAnimalSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = ["period"]
@@ -24,4 +28,11 @@ class AnimalViewSet(ModelViewSet):
             serializer_class = AnimalSerializer
         return serializer_class
 
-
+    def create(self, request, *args, **kwargs):
+        data = copy.deepcopy(request.data)
+        data["creator"] = request.user.id
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
