@@ -174,6 +174,20 @@ class AnimalViewTestCase(APITestCase):
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         self.verify_expected_animal_count_and_get_results(0)
 
+        res = self.client.post(target_url, data=json.dumps(animal), content_type="application/json")
+
+        delete_target_url = reverse("animals-detail", args=[res.data["id"]])
+
+        self.verify_expected_animal_count_and_get_results(1)
+
+        self.given_user_authenticated(self.admin_user.username, "12345")
+
+        res = self.client.delete(delete_target_url)
+
+        # And see the animal deleted
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        self.verify_expected_animal_count_and_get_results(0)
+
     def given_user_authenticated(self, username, password):
         auth_url = reverse("api-token-obtain-pair")
         res = self.client.post(auth_url, data=dict(username=username, password=password))

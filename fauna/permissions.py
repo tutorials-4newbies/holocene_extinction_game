@@ -14,5 +14,6 @@ class IsCreatorMutatingOrReadOnly(IsAuthenticatedOrReadOnly):
         """
         return (
                 request.method in SAFE_METHODS or
-                (request.user and request.user.is_authenticated and request.user == obj.creator)
+                (request.user and request.user.is_authenticated and (request.user.is_superuser or request.user == obj.creator))
+
         )
