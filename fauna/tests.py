@@ -116,7 +116,6 @@ class AnimalViewTestCase(APITestCase):
         self.assertIn("taxonomy_family", first_animal)
 
     def test_authenticated_user_can_create(self):
-
         self.verify_expected_animal_count_and_get_results(0)
         target_url = reverse("animals-list")
         animal = dict(period=Animal.PERIOD_CHOICES[5][0],
@@ -188,6 +187,72 @@ class AnimalViewTestCase(APITestCase):
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         self.verify_expected_animal_count_and_get_results(0)
 
+    def test_animal_like_behavior(self):
+        # create animal
+        # create user
+        # should try to like and fail
+        # the user should be authenticated
+        # get the animal verify like count == 0 , is_liked = False
+        # should try to like
+        # get the animal - verify like count == 1, is_liked = True
+        # different user login
+        # get the animal - verify like count == 1, is_liked = False
+        first_user = self.given_user_exists(username="test_user", email="test@example.com", password="12345")
+        second_user = self.given_user_exists(username="second_user", email="second@example.com", password="12345")
+
+        # Now authenticate and create animal as first user
+        self.given_user_authenticated("admin_user", "12345")
+        animal_data = self.when_authenticated_user_creates_animal_via_api()
+        self.given_user_unauthenticated()
+        animal_id = animal_data["id"]
+        animal_url = reverse("animals-detail", args=[animal_id])
+
+        res = self.client.get(animal_url)
+        self.assertEqual(res.data["likes_count"], 0)
+        # self.assertEqual(res.data["is_liked"], False)
+        like_target_url = reverse("animals-like", args=[animal_id])
+
+        res = self.client.post(like_target_url)
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        self.given_user_authenticated("test_user", "12345")
+        res = self.client.post(like_target_url)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+        #get the animal
+        res = self.client.get(animal_url)
+        self.assertEqual(res.data["likes_count"], 1)
+        # self.assertEqual(res.data["is_liked"], True) #As I haved LIKED the animal
+
+        # Now switch users
+        self.given_user_authenticated("second_user", "12345")
+
+
+        res = self.client.get(animal_url)
+        self.assertEqual(res.data["likes_count"], 1)
+        # self.assertEqual(res.data["is_liked"], False) #I'm not the creating user, so shoul;dn't show that I have liked
+
+
+
+
+
+
+
+    def when_authenticated_user_creates_animal_via_api(self, **animal_params):
+        target_url = reverse("animals-list")
+        animal = dict(period=animal_params.get("period", Animal.PERIOD_CHOICES[5][0]),
+                      extinction=animal_params.get("extinction", "K/t"),
+                      name=animal_params.get("name", "T-rex"),
+                      taxonomy_class=animal_params.get("taxonomy_class", "Dinsourses"),
+                      taxonomy_order=animal_params.get("taxonomy_order", "Thripods"),
+                      taxonomy_family=animal_params.get("taxonomy_family", "Rex"))
+
+        res = self.client.post(target_url, data=json.dumps(animal), content_type="application/json")
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        return res.data
+
+    def given_user_unauthenticated(self):
+        self.client.credentials(HTTP_AUTHORIZATION="")
     def given_user_authenticated(self, username, password):
         auth_url = reverse("api-token-obtain-pair")
         res = self.client.post(auth_url, data=dict(username=username, password=password))
@@ -209,7 +274,7 @@ class AnimalViewTestCase(APITestCase):
         return obj
 
     def given_user_exists(self, username, email, password, is_staff=False, is_superuser=False) -> User:
-
-        obj = User.objects.create_user(username=username,email=email, password=password, is_staff=is_staff, is_superuser=is_superuser)
+        obj = User.objects.create_user(username=username, email=email, password=password, is_staff=is_staff,
+                                       is_superuser=is_superuser)
 
         return obj

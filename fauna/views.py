@@ -9,8 +9,10 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 # Create your views here.
 from fauna.models import Animal
-from fauna.permissions import IsCreatorMutatingOrReadOnly
+from fauna.permissions import IsCreatorMutatingOrReadOnly, LikePermission
 from fauna.serializers import AnimalSerializer, AnonymousUserAnimalSerializer
+from rest_framework.decorators import action
+
 
 
 class AnimalViewSet(ModelViewSet):
@@ -36,3 +38,16 @@ class AnimalViewSet(ModelViewSet):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    @action(methods=["POST"], detail=True, permission_classes=[LikePermission])
+    def like(self, request, pk=None):
+        """
+        /animals/pk(1)/like
+        """
+        # get the animal
+        animal:Animal = self.get_object()
+        animal.likes.add(request.user)
+        # add a like and save
+        # return the animal
+        serializer = self.get_serializer(animal)
+        return Response(status=status.HTTP_201_CREATED, data=serializer.data)

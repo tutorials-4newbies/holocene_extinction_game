@@ -3,7 +3,11 @@ from rest_framework import serializers
 
 from fauna.models import Animal
 
-class AnimalSerializer(serializers.ModelSerializer):
+class AnonymousUserAnimalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Animal
+        fields = ["id", "name", "period", "likes_count"]
+class AnimalSerializer(AnonymousUserAnimalSerializer):
     creator = serializers.PrimaryKeyRelatedField(
         queryset=get_user_model().objects.all()
     )
@@ -11,10 +15,7 @@ class AnimalSerializer(serializers.ModelSerializer):
     class Meta:
         model = Animal
         fields = ["id", "name", "period", "extinction", "taxonomy_class", "taxonomy_order", "taxonomy_family",
-                  "creator"]
+                  "creator", "likes_count"]
 
 
-class AnonymousUserAnimalSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Animal
-        fields = ["id", "name", "period"]
+
