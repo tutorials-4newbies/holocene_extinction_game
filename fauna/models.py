@@ -25,8 +25,13 @@ class Animal(models.Model):
     taxonomy_class = models.CharField(max_length=50, blank=False, null=False)
     taxonomy_order = models.CharField(max_length=50, blank=False, null=False)
     taxonomy_family = models.CharField(max_length=50, blank=False, null=False)
-    creator = models.ForeignKey(settings.AUTH_USER_MODEL, blank=False, null=False, on_delete=CASCADE)
-
+    creator = models.ForeignKey(settings.AUTH_USER_MODEL, blank=False, null=False, on_delete=CASCADE, related_name='animals_created')
+    likes = models.ManyToManyField(to=settings.AUTH_USER_MODEL, related_name='animals_liked')
+    
     def __str__(self):
         return f"{self.name} of {self.taxonomy_family}"
+
+    @property
+    def likes_count(self):
+        return self.likes.all().count()
 
