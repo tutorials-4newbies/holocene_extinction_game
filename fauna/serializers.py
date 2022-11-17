@@ -1,7 +1,8 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from fauna.models import Animal
+from fauna.models import Animal, Like
+
 
 class AnimalSerializer(serializers.ModelSerializer):
     creator = serializers.PrimaryKeyRelatedField(
@@ -18,3 +19,9 @@ class AnonymousUserAnimalSerializer(serializers.ModelSerializer):
     class Meta:
         model = Animal
         fields = ["id", "name", "period"]
+
+
+class LikeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Like
+        fields = ["id", "user", "animal"]

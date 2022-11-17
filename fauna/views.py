@@ -9,8 +9,9 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 # Create your views here.
 from fauna.models import Animal
+from fauna.models import Like
 from fauna.permissions import IsCreatorMutatingOrReadOnly
-from fauna.serializers import AnimalSerializer, AnonymousUserAnimalSerializer
+from fauna.serializers import AnimalSerializer, AnonymousUserAnimalSerializer, LikeSerializer
 
 
 class AnimalViewSet(ModelViewSet):
@@ -36,3 +37,10 @@ class AnimalViewSet(ModelViewSet):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class LikeViewSet(ModelViewSet):
+    # like_because_you_have_no_life
+    queryset = Like.objects.all()
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    serializer_class = LikeSerializer
