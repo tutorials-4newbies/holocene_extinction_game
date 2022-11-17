@@ -33,6 +33,6 @@ class Animal(models.Model):
 
     @property
     def likes_count(self) -> int:
-        # Optimization issue lurking here.. we'll get back to that
+        # Optimization issue lurking here... we'll get back to that
         return self.likes.all().count()
 
