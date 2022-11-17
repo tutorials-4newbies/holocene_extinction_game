@@ -11,10 +11,11 @@ class AnimalSerializer(serializers.ModelSerializer):
     class Meta:
         model = Animal
         fields = ["id", "name", "period", "extinction", "taxonomy_class", "taxonomy_order", "taxonomy_family",
+                  "likes_count",
                   "creator"]
 
 
 class AnonymousUserAnimalSerializer(serializers.ModelSerializer):
     class Meta:
         model = Animal
-        fields = ["id", "name", "period"]
+        fields = ["id", "name", "period", "likes_count"]
