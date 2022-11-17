@@ -30,13 +30,8 @@ class AnimalViewSet(ModelViewSet):
         if self.request.user.is_authenticated:
             serializer_class = AnimalSerializer
         return serializer_class
-    
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if request.user.is_authenticated:
-            instance.is_liked = bool(request.user.animals_liked.filter(id=instance.id))
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
+
+
 
     def create(self, request, *args, **kwargs):
         data = copy.deepcopy(request.data)

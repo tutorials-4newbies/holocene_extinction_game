@@ -13,10 +13,18 @@ class AnonymousUserAnimalSerializer(serializers.ModelSerializer):
 
 
 class AnimalSerializer(AnonymousUserAnimalSerializer):
-    is_liked = serializers.BooleanField(read_only=True)
+    is_liked = serializers.SerializerMethodField(method_name='get_is_liked')
     creator = serializers.PrimaryKeyRelatedField(
         queryset=get_user_model().objects.all()
     )
+
+    def get_is_liked(self, obj):
+        request_user = self.context['request'].user
+        if request_user.is_anonymous:
+            return False
+        animal_liked = request_user.animals_liked.filter(id=obj.id).exists()
+        return animal_liked
+
 
     class Meta:
         model = Animal
