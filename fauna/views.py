@@ -30,6 +30,8 @@ class AnimalViewSet(ModelViewSet):
             serializer_class = AnimalSerializer
         return serializer_class
 
+
+
     def create(self, request, *args, **kwargs):
         data = copy.deepcopy(request.data)
         data["creator"] = request.user.id

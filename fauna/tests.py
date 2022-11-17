@@ -209,7 +209,7 @@ class AnimalViewTestCase(APITestCase):
 
         res = self.client.get(animal_url)
         self.assertEqual(res.data["likes_count"], 0)
-        # self.assertEqual(res.data["is_liked"], False)
+        self.assertEqual(res.data["is_liked"], False)
         like_target_url = reverse("animals-like", args=[animal_id])
 
         res = self.client.post(like_target_url)
@@ -222,7 +222,7 @@ class AnimalViewTestCase(APITestCase):
         #get the animal
         res = self.client.get(animal_url)
         self.assertEqual(res.data["likes_count"], 1)
-        # self.assertEqual(res.data["is_liked"], True) #As I haved LIKED the animal
+        self.assertEqual(res.data["is_liked"], True) #As I haved LIKED the animal
 
         # Now switch users
         self.given_user_authenticated("second_user", "12345")
@@ -230,7 +230,7 @@ class AnimalViewTestCase(APITestCase):
 
         res = self.client.get(animal_url)
         self.assertEqual(res.data["likes_count"], 1)
-        # self.assertEqual(res.data["is_liked"], False) #I'm not the creating user, so shoul;dn't show that I have liked
+        self.assertEqual(res.data["is_liked"], False) #I'm not the creating user, so shoul;dn't show that I have liked
 
 
 
