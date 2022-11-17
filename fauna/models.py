@@ -30,3 +30,9 @@ class Animal(models.Model):
     def __str__(self):
         return f"{self.name} of {self.taxonomy_family}"
 
+# Many to Many: animals and Users
+
+
+class Like(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=False, null=False, on_delete=CASCADE)
+    animal = models.ForeignKey(Animal, blank=False, null=False, on_delete=CASCADE)

@@ -188,6 +188,32 @@ class AnimalViewTestCase(APITestCase):
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         self.verify_expected_animal_count_and_get_results(0)
 
+    def test_auth_user_can_like(self):
+        # create animal
+        animal = dict(period=Animal.PERIOD_CHOICES[5][0],
+                      extinction="K/t",
+                      name="T-rex",
+                      taxonomy_class="Dinsourses",
+                      taxonomy_order="Thripods",
+                      taxonomy_family="Rex",
+                      creator_id=self.admin_user.id)
+
+        self.given_animal_exists(animal)
+
+        # create user
+        test_user = self.given_user_exists(self, "oooory", "oooory@gmail.com", "oooorrrryyyy")
+
+        # should try to like and fail
+        url = reverse("like_because_you_have_no_life")
+        res = self.client.post(url, data=dict(username="username", animal_id=animal.id))
+
+        # the user should be authenticated
+        # get the animal verify like count == 0 , is_liked = False
+        # should try to like
+        # get the animal - verify like count == 1, is_liked = True
+        # different user login
+        # get the animal - verify like count == 1, is_liked = False
+
     def given_user_authenticated(self, username, password):
         auth_url = reverse("api-token-obtain-pair")
         res = self.client.post(auth_url, data=dict(username=username, password=password))
