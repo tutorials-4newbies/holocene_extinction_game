@@ -38,6 +38,9 @@ class AnimalViewSet(ModelViewSet):
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-
-    @action(methods=['POST'], detail=True, permission_classes=LikePermissions)
-    def like(self, request):
+    @action(methods=['POST'], detail=True, permission_classes=[LikePermissions])
+    def like(self, request, *args, **kwargs):
+        animal = Animal.objects.get(pk=kwargs['pk'])
+        animal.likes.add(request.user)
+        serializer = self.get_serializer(animal)
+        return Response(status=status.HTTP_201_CREATED, data=serializer.data)
