@@ -232,7 +232,54 @@ class AnimalViewTestCase(APITestCase):
         self.assertEqual(res.data["likes_count"], 1)
         self.assertEqual(res.data["is_liked"], False) #I'm not the creating user, so shoul;dn't show that I have liked
 
+    def test_animal_unlike_behavior(self):
+        # create animal
+        # create user
+        # the user should be authenticated
+        # should try to like
+        # get the animal - verify like count == 1, is_liked = True
+        # should unlike
+        # get the animal verify like count == 0 , is_liked = False
+        # try to unlike AGAIN the animal and get a success
+        # get the animal verify like count == 0 , is_liked = False
+        first_user = self.given_user_exists(username="test_user", email="test@example.com", password="12345")
 
+        # Now authenticate and create animal as admin user
+        self.given_user_authenticated("admin_user", "12345")
+        animal_data = self.when_authenticated_user_creates_animal_via_api()
+        self.given_user_unauthenticated()
+
+
+        animal_id = animal_data["id"]
+        animal_url = reverse("animals-detail", args=[animal_id])
+
+        like_target_url = reverse("animals-like", args=[animal_id])
+        unlike_target_url = reverse("animals-unlike", args=[animal_id])
+
+        self.given_user_authenticated("test_user", "12345")
+        res = self.client.post(like_target_url)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+        res = self.client.get(animal_url)
+        self.assertEqual(res.data["likes_count"], 1)
+        self.assertEqual(res.data["is_liked"], True)  # As I haved LIKED the animal
+
+        res = self.client.post(unlike_target_url)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+        res = self.client.get(animal_url)
+        self.assertEqual(res.data["likes_count"], 0)
+        self.assertEqual(res.data["is_liked"], False)  # As I haved UNLIKED the animal
+
+        # Now verify unliking without a current like doesn't break the system
+        res = self.client.post(unlike_target_url)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+        res = self.client.get(animal_url)
+        self.assertEqual(res.data["likes_count"], 0)
+        self.assertEqual(res.data["is_liked"], False)  # As I haved UNLIKED the animal
 
 
 

@@ -44,12 +44,21 @@ class AnimalViewSet(ModelViewSet):
     @action(methods=["POST"], detail=True, permission_classes=[LikePermission])
     def like(self, request, pk=None):
         """
+        THIS WITH DETAIl:
         /animals/pk(1)/like
+
         """
         # get the animal
         animal:Animal = self.get_object()
         animal.likes.add(request.user)
         # add a like and save
         # return the animal
+        serializer = self.get_serializer(animal)
+        return Response(status=status.HTTP_201_CREATED, data=serializer.data)
+
+    @action(methods=["POST"], detail=True, permission_classes=[LikePermission])
+    def unlike(self, request, pk=None):
+        animal: Animal = self.get_object()
+        animal.likes.remove(request.user)
         serializer = self.get_serializer(animal)
         return Response(status=status.HTTP_201_CREATED, data=serializer.data)
