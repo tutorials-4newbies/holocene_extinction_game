@@ -48,3 +48,10 @@ class AnimalViewSet(ModelViewSet):
         animal.likes.add(request.user)
         serializer = self.get_serializer(animal)
         return Response(status=status.HTTP_201_CREATED, data=serializer.data)
+
+    @action(methods=['POST'],detail=True, permission_classes=[LikePermission])
+    def unlike(self, request, pk=None):
+        animal = self.get_object()
+        animal.likes.remove(request.user)
+        serializer = self.get_serializer(animal)
+        return Response(status=status.HTTP_204_NO_CONTENT, data=serializer.data)

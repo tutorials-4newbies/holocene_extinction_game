@@ -208,7 +208,6 @@ class AnimalViewTestCase(APITestCase):
 
         self.given_user_unauthenticated()
 
-
         res = self.client.get(animal_url)
         self.assertEqual(res.data['likes_count'], 0)
 
@@ -226,12 +225,43 @@ class AnimalViewTestCase(APITestCase):
         self.assertEqual(res.data['likes_count'], 1)
         self.assertEqual(res.data['is_liked'], True)
 
-        #switch user
-        self.given_user_authenticated('second_user','12345')
+        # switch user
+        self.given_user_authenticated('second_user', '12345')
         res = self.client.get(animal_url)
         self.assertEqual(res.data['likes_count'], 1)
         self.assertEqual(res.data['is_liked'], False)
 
+    def test_animal_unlike_behavior(self):
+        first_user = self.given_user_exists(username="test_user", email="test@example.com", password="12345")
+        second_user = self.given_user_exists(username="second_user", email="second@example.com", password="12345")
+        self.given_user_authenticated(username='admin_user', password='12345')
+        animal_data = self.when_authenticated_user_creates_animal_via_api()
+
+        animal_id = animal_data["id"]
+        like_target_url = reverse('animals-like', args=[animal_id])
+        unlike_target_url = reverse('animals-unlike', args=[animal_id])
+
+        self.verify_animal_like_count_and_is_liked(animal_id, expected_count=0, expected_is_liked=False)
+
+        self.given_user_authenticated("test_user", "12345")
+        res = self.client.post(unlike_target_url)
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        # get animal and check
+        self.verify_animal_like_count_and_is_liked(animal_id, expected_count=0, expected_is_liked=False)
+
+        res = self.client.post(like_target_url)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.verify_animal_like_count_and_is_liked(animal_id, expected_count=1, expected_is_liked=True)
+
+        res = self.client.post(unlike_target_url)
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        self.verify_animal_like_count_and_is_liked(animal_id, expected_count=0, expected_is_liked=False)
+
+    def verify_animal_like_count_and_is_liked(self, animal_id, expected_count, expected_is_liked):
+        animal_url = reverse('animals-detail', args=[animal_id])
+        res = self.client.get(animal_url)
+        self.assertEqual(res.data['likes_count'], expected_count)
+        self.assertEqual(res.data['is_liked'], expected_is_liked)
 
     def given_user_unauthenticated(self):
         self.client.credentials(HTTP_AUTHORIZATION='')
