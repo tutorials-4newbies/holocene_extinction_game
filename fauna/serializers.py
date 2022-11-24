@@ -8,7 +8,7 @@ class AnonymousUserAnimalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Animal
-        fields = ["id", "name", "period", "likes_count", "is_liked"]
+        fields = ["id", "name", "period", "likes_count", "is_liked", "picture"]
 
     def get_is_liked(self, obj:Animal):
         # if the user is anonmyous then no
@@ -25,7 +25,7 @@ class AnimalSerializer(AnonymousUserAnimalSerializer):
     class Meta:
         model = Animal
         fields = ["id", "name", "period", "extinction", "taxonomy_class", "taxonomy_order", "taxonomy_family",
-                  "creator", "likes_count", "is_liked"]
+                  "creator", "likes_count", "is_liked", "picture"]
 
 
 
