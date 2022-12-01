@@ -1,16 +1,17 @@
 import copy
 
+from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import render
 from rest_framework import mixins, status
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
-from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
+from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet, GenericViewSet
 # Create your views here.
 from fauna.models import Animal
 from fauna.permissions import IsCreatorMutatingOrReadOnly, LikePermission
-from fauna.serializers import AnimalSerializer, AnonymousUserAnimalSerializer
+from fauna.serializers import AnimalSerializer, AnonymousUserAnimalSerializer, UsersViewSerializer
 from rest_framework.decorators import action
 
 
@@ -53,3 +54,9 @@ class AnimalViewSet(ModelViewSet):
         # return the animal
         serializer = self.get_serializer(animal)
         return Response(status=status.HTTP_201_CREATED, data=serializer.data)
+
+class UsersView(mixins.RetrieveModelMixin, GenericViewSet):
+    queryset = get_user_model().objects.all()
+    permission_classes = [AllowAny]
+    serializer_class = UsersViewSerializer
+
