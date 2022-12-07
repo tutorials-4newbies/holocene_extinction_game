@@ -26,6 +26,7 @@ admin.site.site_header = "holocene_extinction_game admin site"
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/fauna/', include("fauna.urls")),
+    path('api/flora/', include("flora.urls")),
     path('health_check', views.healthcheck, name='healthcheck'),
     path('api-token-auth/', TokenObtainPairView.as_view(), name='api-token-obtain-pair'),
     path('api-token-refresh/', TokenRefreshView.as_view(), name='api-token-refresh'),

@@ -47,7 +47,7 @@ class Base(Configuration):
         'django.contrib.messages',
         'django.contrib.staticfiles',
     ]
-    HOLOCENE_EXTINCTION_GAME_APPS = ["fauna"]
+    HOLOCENE_EXTINCTION_GAME_APPS = ["fauna", "flora"]
     INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + HOLOCENE_EXTINCTION_GAME_APPS
 
     MIDDLEWARE = [
