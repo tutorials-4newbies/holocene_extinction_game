@@ -2,6 +2,7 @@ import copy
 
 from django.contrib.auth import get_user_model
 from django.db.models import Count
+from django.db.models.functions import Length
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import render
 from rest_framework import mixins, status
@@ -55,7 +56,11 @@ class AnimalViewSet(ModelViewSet):
 
     @action(methods=["GET"], detail=False)
     def dashboard(self, requset):
-        animals = Animal.objects.annotate(likes_counter=Count("likes")).all().order_by("-likes_counter")
+        animals = Animal.objects.annotate(
+            likes_counter=Count("likes"),
+            nameLength=Length("name")
+        )\
+            .all().order_by("-likes_counter")
         serializer = self.get_serializer(animals, many=True)
         return Response(status=status.HTTP_200_OK, data=serializer.data)
 
