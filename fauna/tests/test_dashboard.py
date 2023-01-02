@@ -21,39 +21,54 @@ class DashBoardTestCase(APITestCase):
         super().tearDown()
 
     def test_get_animals_with_most_likes(self):
-        first_user = given_user_exists(username="test_user", email="test@example.com", password="12345")
-        second_user = given_user_exists(username="second_user", email="second@example.com", password="12345")
-
-        # Now authenticate and create animal as first user
+        # Admin login
         given_user_authenticated(self.client, "admin_user", "12345")
-        animal_data = self.when_authenticated_user_creates_animal_via_api()
+        # Create 6 animals
+        triceratops = self.when_authenticated_user_creates_animal_via_api(name="Triceratops")
+        archaeopteryx = self.when_authenticated_user_creates_animal_via_api(name="Archaeopteryx")
+        brachiosaurus = self.when_authenticated_user_creates_animal_via_api(name="Brachiosaurus")
+        velociraptor = self.when_authenticated_user_creates_animal_via_api(name="Velociraptor")
+        spinosaurus = self.when_authenticated_user_creates_animal_via_api(name="Spinosaurus")
+        stegosaurus = self.when_authenticated_user_creates_animal_via_api(name="Stegosaurus")
+
+        # Admin logout
         given_user_unauthenticated(self.client)
-        animal_id = animal_data["id"]
-        animal_url = reverse("animals-detail", args=[animal_id])
 
-        res = self.client.get(animal_url)
-        self.assertEqual(res.data["likes_count"], 0)
-        self.assertEqual(res.data["is_liked"], False)
-        like_target_url = reverse("animals-like", args=[animal_id])
+        # Add users
+        first_user = given_user_exists(username="first_user", email="first@example.com", password="12345")
+        second_user = given_user_exists(username="second_user", email="second@example.com", password="12345")
+        third_user = given_user_exists(username="third_user", email="third_user@example.com", password="12345")
 
-        res = self.client.post(like_target_url)
-        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+        # Choose and use one of the animals
+        stegosaurus_id = stegosaurus["id"]
+        stegosaurus_url = reverse("animals-detail", args=[stegosaurus_id])
+        like_target_url = reverse("animals-like", args=[stegosaurus_id])
 
-        given_user_authenticated(self.client, "test_user", "12345")
+        # Add a like with the first user
+        given_user_authenticated(self.client, first_user.username, "12345")
         res = self.client.post(like_target_url)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
 
-        # get the animal
-        res = self.client.get(animal_url)
-        self.assertEqual(res.data["likes_count"], 1)
-        self.assertEqual(res.data["is_liked"], True)  # As I haved LIKED the animal
+        # Add a like with the second_user
+        given_user_authenticated(self.client, second_user.username, "12345")
+        res = self.client.post(like_target_url)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
 
-        # Now switch users
-        given_user_authenticated(self.client, "second_user", "12345")
+        # Add a like with the third_user
+        given_user_authenticated(self.client, third_user.username, "12345")
+        res = self.client.post(like_target_url)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
 
-        res = self.client.get(animal_url)
-        self.assertEqual(res.data["likes_count"], 1)
-        self.assertEqual(res.data["is_liked"], False)  # I'm not the creating user, so shoul;dn't show that I have liked
+        # Check that the chosen animal has 3 likes
+        res = self.client.get(stegosaurus_url)
+        self.assertEqual(res.data["likes_count"], 3)
+
+        # Get Animal list which should be ordered by likes count
+        dashboard_url = reverse("animals-dashboard")
+        res = self.client.get(dashboard_url)
+        animals = res.data
+        first_animal = animals[0]
+        self.assertEqual(first_animal['id'], stegosaurus_id)
 
     def when_authenticated_user_creates_animal_via_api(self, **animal_params):
         target_url = reverse("animals-list")

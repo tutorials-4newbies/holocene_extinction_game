@@ -1,6 +1,7 @@
 import copy
 
 from django.contrib.auth import get_user_model
+from django.db.models import Count
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import render
 from rest_framework import mixins, status
@@ -11,9 +12,9 @@ from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet, GenericV
 # Create your views here.
 from fauna.models import Animal
 from fauna.permissions import IsCreatorMutatingOrReadOnly, LikePermission
-from fauna.serializers import AnimalSerializer, AnonymousUserAnimalSerializer, UsersViewSerializer
+from fauna.serializers import AnimalSerializer, AnonymousUserAnimalSerializer, UsersViewSerializer, \
+    AnimalDashboardSerializer
 from rest_framework.decorators import action
-
 
 
 class AnimalViewSet(ModelViewSet):
@@ -27,11 +28,11 @@ class AnimalViewSet(ModelViewSet):
 
     def get_serializer_class(self):
         serializer_class = super().get_serializer_class()
-        if self.request.user.is_authenticated:
+        if self.action == "dashboard":
+            serializer_class = AnimalDashboardSerializer
+        elif self.request.user.is_authenticated:
             serializer_class = AnimalSerializer
         return serializer_class
-
-
 
     def create(self, request, *args, **kwargs):
         data = copy.deepcopy(request.data)
@@ -48,15 +49,21 @@ class AnimalViewSet(ModelViewSet):
         /animals/pk(1)/like
         """
         # get the animal
-        animal:Animal = self.get_object()
+        animal: Animal = self.get_object()
         animal.likes.add(request.user)
         # add a like and save
         # return the animal
         serializer = self.get_serializer(animal)
         return Response(status=status.HTTP_201_CREATED, data=serializer.data)
 
+    @action(methods=["GET"], detail=False)
+    def dashboard(self, requset):
+        animals = Animal.objects.annotate(likes_counter=Count("likes")).all().order_by("-likes_counter")
+        serializer = self.get_serializer(animals, many=True)
+        return Response(status=status.HTTP_200_OK, data=serializer.data)
+
+
 class UsersView(mixins.RetrieveModelMixin, GenericViewSet):
     queryset = get_user_model().objects.all()
     permission_classes = [AllowAny]
     serializer_class = UsersViewSerializer
-
