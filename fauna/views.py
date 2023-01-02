@@ -13,8 +13,7 @@ from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet, GenericV
 # Create your views here.
 from fauna.models import Animal
 from fauna.permissions import IsCreatorMutatingOrReadOnly, LikePermission
-from fauna.serializers import AnimalSerializer, AnonymousUserAnimalSerializer, UsersViewSerializer, \
-    AnimalDashBoardSerializer
+from fauna.serializers import AnimalSerializer, AnonymousUserAnimalSerializer, UsersViewSerializer
 from rest_framework.decorators import action
 
 
@@ -29,9 +28,7 @@ class AnimalViewSet(ModelViewSet):
 
     def get_serializer_class(self):
         serializer_class = super().get_serializer_class()
-        if self.action == "dashboard":
-            serializer_class = AnimalDashBoardSerializer
-        elif self.request.user.is_authenticated:
+        if self.request.user.is_authenticated:
             serializer_class = AnimalSerializer
         return serializer_class
 
@@ -56,16 +53,6 @@ class AnimalViewSet(ModelViewSet):
         # return the animal
         serializer = self.get_serializer(animal)
         return Response(status=status.HTTP_201_CREATED, data=serializer.data)
-
-    @action(methods=["GET"], detail=False)
-    def dashboard(self, requset):
-        animals = Animal.objects.annotate(
-            likes_counter=Count("likes"),
-            nameLength=Length("name")
-        )\
-            .all().order_by("-likes_counter")
-        serializer = self.get_serializer(animals, many=True)
-        return Response(status=status.HTTP_200_OK, data=serializer.data)
 
 
 class UsersView(mixins.RetrieveModelMixin, GenericViewSet):

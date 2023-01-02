@@ -23,12 +23,9 @@ class DashBoardTestCase(APITestCase):
     def test_get_animals_with_most_likes(self):
         # Admin login
         given_user_authenticated(self.client, "admin_user", "12345")
+
         # Create 6 animals
-        triceratops = self.when_authenticated_user_creates_animal_via_api(name="Triceratops")
-        archaeopteryx = self.when_authenticated_user_creates_animal_via_api(name="Archaeopteryx")
-        brachiosaurus = self.when_authenticated_user_creates_animal_via_api(name="Brachiosaurus")
-        velociraptor = self.when_authenticated_user_creates_animal_via_api(name="Velociraptor")
-        spinosaurus = self.when_authenticated_user_creates_animal_via_api(name="Spinosaurus")
+        #...
         stegosaurus = self.when_authenticated_user_creates_animal_via_api(name="Stegosaurus")
 
         # Admin logout
@@ -36,40 +33,27 @@ class DashBoardTestCase(APITestCase):
 
         # Add users
         first_user = given_user_exists(username="first_user", email="first@example.com", password="12345")
-        second_user = given_user_exists(username="second_user", email="second@example.com", password="12345")
-        third_user = given_user_exists(username="third_user", email="third_user@example.com", password="12345")
+        # ...
 
-        # Choose and use one of the animals
+        # Choose and use one of the animals - the stegosaurus
         stegosaurus_id = stegosaurus["id"]
-        stegosaurus_url = reverse("animals-detail", args=[stegosaurus_id])
         like_target_url = reverse("animals-like", args=[stegosaurus_id])
 
         # Add a like with the first user
-        given_user_authenticated(self.client, first_user.username, "12345")
-        res = self.client.post(like_target_url)
-        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
 
         # Add a like with the second_user
-        given_user_authenticated(self.client, second_user.username, "12345")
-        res = self.client.post(like_target_url)
-        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
 
         # Add a like with the third_user
-        given_user_authenticated(self.client, third_user.username, "12345")
-        res = self.client.post(like_target_url)
-        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
 
         # Check that the chosen animal has 3 likes
-        res = self.client.get(stegosaurus_url)
-        self.assertEqual(res.data["likes_count"], 3)
+        stegosaurus_url = reverse("animals-detail", args=[stegosaurus_id])
+
 
         # Get Animal list which should be ordered by likes count
-        dashboard_url = reverse("animals-dashboard")
-        res = self.client.get(dashboard_url)
-        animals = res.data
-        first_animal = animals[0]
-        self.assertEqual(first_animal['id'], stegosaurus_id)
-        self.assertEqual(first_animal['nameLength'], len(stegosaurus['name']))
+        # assert the order
+
 
     def when_authenticated_user_creates_animal_via_api(self, **animal_params):
         target_url = reverse("animals-list")
