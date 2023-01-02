@@ -69,6 +69,7 @@ class DashBoardTestCase(APITestCase):
         animals = res.data
         first_animal = animals[0]
         self.assertEqual(first_animal['id'], stegosaurus_id)
+        self.assertEqual(first_animal['nameLength'], len(stegosaurus['name']))
 
     def when_authenticated_user_creates_animal_via_api(self, **animal_params):
         target_url = reverse("animals-list")
