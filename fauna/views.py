@@ -1,7 +1,7 @@
 import copy
 
 from django.contrib.auth import get_user_model
-from django.db.models import Count
+from django.db.models import Count, Avg, Max, Min
 from django.db.models.functions import Length
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import render
@@ -59,12 +59,27 @@ class AnimalViewSet(ModelViewSet):
 
     @action(methods=["GET"], detail=False)
     def dashboard(self, requset):
-        animals = Animal.objects.annotate(
-            likes_counter=Count("likes"),
-            nameLength=Length("name")
-        )\
-            .all().order_by("-likes_counter")
-        serializer = self.get_serializer(animals, many=True)
+        # result = dict(
+        #     animals_count=6,
+        #     avg_name_length=9,
+        #     longest_name="spinosaurus",
+        #     shortest_name="bee",
+        #     most_liked_animal_name="Velociraptor",
+        #     top_3_liked_animals=[dict(
+        #         id, name...
+        #     ), dict(), dict()]
+        # )
+        results = Animal.objects.aggregate(
+            animals_count=Count("id"),
+            avg_name_length=Avg(Length("name")),
+        )
+        ordered_names = Animal.objects.values_list("name", flat=True).order_by(Length("name").desc()).all()
+        results['longest_name'] = ordered_names.first()
+        results['shortest_name'] = ordered_names.last()
+        ordered_likes = Animal.objects.annotate(like_counter=Count("likes")).order_by("-like_counter").all()[:3]
+        results['most_liked_animal_name'] = ordered_likes[0].name
+        results['top_3_liked_animals'] = ordered_likes
+        serializer = self.get_serializer(results)
         return Response(status=status.HTTP_200_OK, data=serializer.data)
 
 

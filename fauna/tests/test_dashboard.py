@@ -24,12 +24,13 @@ class DashBoardTestCase(APITestCase):
         # Admin login
         given_user_authenticated(self.client, "admin_user", "12345")
         # Create 6 animals
-        triceratops = self.when_authenticated_user_creates_animal_via_api(name="Triceratops")
+        triceratops = self.when_authenticated_user_creates_animal_via_api(name="Triceratops_123454251")
         archaeopteryx = self.when_authenticated_user_creates_animal_via_api(name="Archaeopteryx")
         brachiosaurus = self.when_authenticated_user_creates_animal_via_api(name="Brachiosaurus")
         velociraptor = self.when_authenticated_user_creates_animal_via_api(name="Velociraptor")
         spinosaurus = self.when_authenticated_user_creates_animal_via_api(name="Spinosaurus")
         stegosaurus = self.when_authenticated_user_creates_animal_via_api(name="Stegosaurus")
+        bee = self.when_authenticated_user_creates_animal_via_api(name="bee")
 
         # Admin logout
         given_user_unauthenticated(self.client)
@@ -63,13 +64,19 @@ class DashBoardTestCase(APITestCase):
         res = self.client.get(stegosaurus_url)
         self.assertEqual(res.data["likes_count"], 3)
 
-        # Get Animal list which should be ordered by likes count
+        # Get Animal dashboard data
         dashboard_url = reverse("animals-dashboard")
         res = self.client.get(dashboard_url)
-        animals = res.data
-        first_animal = animals[0]
-        self.assertEqual(first_animal['id'], stegosaurus_id)
-        self.assertEqual(first_animal['nameLength'], len(stegosaurus['name']))
+        dashboard_data = res.data
+        self.assertEqual(dashboard_data['animals_count'], 7)
+        self.assertEqual(dashboard_data['avg_name_length'], 12)
+        self.assertEqual(dashboard_data['longest_name'], triceratops['name'])
+        self.assertEqual(dashboard_data['shortest_name'], bee['name'])
+        self.assertEqual(dashboard_data['most_liked_animal_name'], stegosaurus["name"])
+        self.assertEqual(len(dashboard_data['top_3_liked_animals']), 3)
+        top_animal = dashboard_data['top_3_liked_animals'][0]
+        self.assertEqual(top_animal["id"], stegosaurus["id"])
+
 
     def when_authenticated_user_creates_animal_via_api(self, **animal_params):
         target_url = reverse("animals-list")
