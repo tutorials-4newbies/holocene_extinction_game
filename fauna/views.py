@@ -59,6 +59,9 @@ class AnimalViewSet(ModelViewSet):
 
     @action(methods=["GET"], detail=False)
     def dashboard(self, requset):
+        #
+        # TODO: Need to create a result like this:
+        #
         # result = dict(
         #     animals_count=6,
         #     avg_name_length=9,
@@ -69,16 +72,10 @@ class AnimalViewSet(ModelViewSet):
         #         id, name...
         #     ), dict(), dict()]
         # )
-        results = Animal.objects.aggregate(
-            animals_count=Count("id"),
-            avg_name_length=Avg(Length("name")),
-        )
-        ordered_names = Animal.objects.values_list("name", flat=True).order_by(Length("name").desc()).all()
-        results['longest_name'] = ordered_names.first()
-        results['shortest_name'] = ordered_names.last()
-        ordered_likes = Animal.objects.annotate(like_counter=Count("likes")).order_by("-like_counter").all()[:3]
-        results['most_liked_animal_name'] = ordered_likes[0].name
-        results['top_3_liked_animals'] = ordered_likes
+
+        # just a placeholder
+        results = {}
+
         serializer = self.get_serializer(results)
         return Response(status=status.HTTP_200_OK, data=serializer.data)
 

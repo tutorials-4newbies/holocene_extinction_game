@@ -37,12 +37,8 @@ class AnimalSerializer(AnonymousUserAnimalSerializer):
 
 
 class AnimalDashBoardSerializer(serializers.Serializer):
-    animals_count = serializers.IntegerField(required=False)
-    avg_name_length = serializers.IntegerField(required=False)
-    longest_name = serializers.CharField(required=False)
-    shortest_name = serializers.CharField(required=False)
-    most_liked_animal_name = serializers.CharField(required=False)
-    top_3_liked_animals = AnimalSerializer(many=True, required=False)
+    # need to add fileds here
+    pass
 
 
 class UsersViewSerializer(serializers.ModelSerializer):

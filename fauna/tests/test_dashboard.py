@@ -65,6 +65,7 @@ class DashBoardTestCase(APITestCase):
         self.assertEqual(res.data["likes_count"], 3)
 
         # Get Animal dashboard data
+        # Updated test
         dashboard_url = reverse("animals-dashboard")
         res = self.client.get(dashboard_url)
         dashboard_data = res.data
