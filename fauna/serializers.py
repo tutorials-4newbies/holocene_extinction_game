@@ -36,15 +36,6 @@ class AnimalSerializer(AnonymousUserAnimalSerializer):
                   "creator", "likes_count", "is_liked", "picture"]
 
 
-class AnimalDashboardSerializer(AnimalSerializer):
-    likes_counter = serializers.IntegerField()
-
-    class Meta:
-        model = Animal
-        fields = ["id", "name", "period", "extinction", "taxonomy_class", "taxonomy_order", "taxonomy_family",
-                  "creator", "likes_count", "likes_counter", "is_liked", "picture"]
-
-
 class UsersViewSerializer(serializers.ModelSerializer):
     animals_created = AnimalSerializer(many=True)
     animals_liked = ThinAnimalSerializer(many=True)
