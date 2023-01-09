@@ -14,7 +14,7 @@ from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet, GenericV
 from fauna.models import Animal
 from fauna.permissions import IsCreatorMutatingOrReadOnly, LikePermission
 from fauna.serializers import AnimalSerializer, AnonymousUserAnimalSerializer, UsersViewSerializer, \
-    AnimalDashBoardSerializer
+    AnimalDashBoardSerializer, AnimalUserSerializer
 from rest_framework.decorators import action
 
 
@@ -31,6 +31,8 @@ class AnimalViewSet(ModelViewSet):
         serializer_class = super().get_serializer_class()
         if self.action == "dashboard":
             serializer_class = AnimalDashBoardSerializer
+        if self.action == "users":
+            serializer_class = AnimalUserSerializer
         elif self.request.user.is_authenticated:
             serializer_class = AnimalSerializer
         return serializer_class
@@ -80,6 +82,12 @@ class AnimalViewSet(ModelViewSet):
         results['most_liked_animal_name'] = ordered_likes[0].name
         results['top_3_liked_animals'] = ordered_likes
         serializer = self.get_serializer(results)
+        return Response(status=status.HTTP_200_OK, data=serializer.data)
+
+    @action(methods=["GET"], detail=False)
+    def users(self, request):
+        results = Animal.objects.select_related("creator").all()
+        serializer = self.get_serializer(results, many=True)
         return Response(status=status.HTTP_200_OK, data=serializer.data)
 
 

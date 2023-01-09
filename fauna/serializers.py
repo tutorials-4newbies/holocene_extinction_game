@@ -56,3 +56,18 @@ class UsersViewSerializer(serializers.ModelSerializer):
 
     def get_how_many_liked(self, obj):
         return obj.animals_liked.count()
+
+
+class ThinUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = ["id", "username"]
+
+
+class AnimalUserSerializer(serializers.ModelSerializer):
+    creator = ThinUserSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = Animal
+        fields = ["id", "name", "creator"]
+

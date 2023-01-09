@@ -1,6 +1,7 @@
 import json
 
 from django.urls import reverse
+from django.test.utils import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -90,3 +91,43 @@ class DashBoardTestCase(APITestCase):
         res = self.client.post(target_url, data=json.dumps(animal), content_type="application/json")
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         return res.data
+
+    @override_settings(DEBUG=True)
+    def test_optimized_likes_count(self):
+        animals = []
+        # Create 1000 animals
+        names = list(range(1, 1000))
+        for name in names:
+            animals.append(Animal(
+                name=name,
+                period="PERMIAN",
+                extinction="K/t",
+                taxonomy_class="Dinsourses",
+                taxonomy_order="Thripods",
+                taxonomy_family="Rex",
+                creator=self.admin_user,
+            ))
+        Animal.objects.bulk_create(animals)
+
+
+        # Add users
+        first_user = given_user_exists(username="first_user", email="first@example.com", password="12345")
+        second_user = given_user_exists(username="second_user", email="second@example.com", password="12345")
+        third_user = given_user_exists(username="third_user", email="third_user@example.com", password="12345")
+
+        # Choose and use one of the animals
+        first_animal_id = 1
+
+        first_animal_like_url = reverse("animals-like", args=[first_animal_id])
+
+        # Add a like with the first user
+        given_user_authenticated(self.client, first_user.username, "12345")
+        res = self.client.post(first_animal_like_url)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+        data_url = reverse("animals-users")
+        res = self.client.get(data_url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+
+
