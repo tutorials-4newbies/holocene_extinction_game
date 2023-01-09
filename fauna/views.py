@@ -60,7 +60,7 @@ class AnimalViewSet(ModelViewSet):
     @action(methods=["GET"], detail=False)
     def dashboard(self, requset):
         #
-        # TODO: Need to create a result like this:
+        # TODO: Need to create a result that will look like this:
         #
         # result = dict(
         #     animals_count=6,
@@ -68,9 +68,7 @@ class AnimalViewSet(ModelViewSet):
         #     longest_name="spinosaurus",
         #     shortest_name="bee",
         #     most_liked_animal_name="Velociraptor",
-        #     top_3_liked_animals=[dict(
-        #         id, name...
-        #     ), dict(), dict()]
+        #     top_3_liked_animals=[list of animals, serialized]
         # )
 
         # just a placeholder
