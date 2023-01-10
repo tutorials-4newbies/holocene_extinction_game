@@ -2,6 +2,7 @@ from django.urls import reverse
 from rest_framework import status
 from fauna.models import Animal
 from fauna.tests.base import BaseAPITestCase
+from django.db import connection
 
 
 class DashBoardTestCase(BaseAPITestCase):
@@ -94,3 +95,52 @@ class DashBoardTestCase(BaseAPITestCase):
         self.assertEqual(creator.get("id"), self.admin_user.id)
         self.assertEqual(creator.get("username"), self.admin_user.username)
         self.assertEqual(creator.get("email"), self.admin_user.email)
+
+    def test_list_animals_and_who_liked_them(self):
+        animals = []
+        # Create 1000 animals as a list
+        required_animals_length = 1000
+        names = list(range(0, required_animals_length))
+        for name in names:
+            animals.append(Animal(
+                name=name,
+                period="PERMIAN",
+                extinction="K/t",
+                taxonomy_class="Dinsourses",
+                taxonomy_order="Thripods",
+                taxonomy_family="Rex",
+                creator=self.admin_user,
+            ))
+        # Bulk insert bypassing our API
+        Animal.objects.bulk_create(animals)
+
+        # Add users
+        first_user = self.given_user_exists(username="first_user", email="first@example.com", password="12345")
+        second_user = self.given_user_exists(username="second_user", email="second@example.com", password="12345")
+        third_user = self.given_user_exists(username="third_user", email="third_user@example.com", password="12345")
+
+        # like the first animal with 3 users
+        first_animal_id = 1
+        like_target_url = reverse("animals-like", args=[first_animal_id])
+
+        # Add a like with the first user
+        self.given_user_authenticated(first_user.username, "12345")
+        res = self.client.post(like_target_url)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+        # Add a like with the second_user
+        self.given_user_authenticated(second_user.username, "12345")
+        res = self.client.post(like_target_url)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+        # Add a like with the third_user
+        self.given_user_authenticated(third_user.username, "12345")
+        res = self.client.post(like_target_url)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+        # get the data from the end point
+        data_url = reverse("animals-likes-list")
+        res = self.client.get(data_url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        data = res.data
+        self.assertEqual(len(data), required_animals_length)
