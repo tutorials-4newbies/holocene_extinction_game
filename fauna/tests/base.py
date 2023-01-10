@@ -5,8 +5,10 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from rest_framework import status
 from fauna.models import Animal
+from django.test.utils import override_settings
 
 
+@override_settings(DEBUG=True)
 class BaseAPITestCase(APITestCase):
     def setUp(self) -> None:
         self.admin_user = self.given_user_exists(username="admin_user",

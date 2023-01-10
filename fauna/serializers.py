@@ -64,7 +64,7 @@ class ThinUserSerializer(serializers.ModelSerializer):
         fields = ["id", "username", "email"]
 
 
-class AnimalUserSerializer(serializers.ModelSerializer):
+class AnimalCreatorSerializer(serializers.ModelSerializer):
     creator = ThinUserSerializer(many=False, read_only=True)
 
     class Meta:

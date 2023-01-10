@@ -1,13 +1,10 @@
-import json
 from django.urls import reverse
-from django.test.utils import override_settings
 from rest_framework import status
 from fauna.models import Animal
 from fauna.tests.base import BaseAPITestCase
 
 
 class DashBoardTestCase(BaseAPITestCase):
-
     def test_get_animals_with_most_likes(self):
         # Admin login
         self.given_user_authenticated("admin_user", "12345")
@@ -52,7 +49,7 @@ class DashBoardTestCase(BaseAPITestCase):
         res = self.client.get(stegosaurus_url)
         self.assertEqual(res.data["likes_count"], 3)
 
-        # Get Animal dashboard data
+        # # Get Animal dashboard data
         dashboard_url = reverse("animals-dashboard")
         res = self.client.get(dashboard_url)
         dashboard_data = res.data
@@ -65,25 +62,11 @@ class DashBoardTestCase(BaseAPITestCase):
         top_animal = dashboard_data['top_3_liked_animals'][0]
         self.assertEqual(top_animal["id"], stegosaurus["id"])
 
-
-    def when_authenticated_user_creates_animal_via_api(self, **animal_params):
-        target_url = reverse("animals-list")
-        animal = dict(period=animal_params.get("period", Animal.PERIOD_CHOICES[5][0]),
-                      extinction=animal_params.get("extinction", "K/t"),
-                      name=animal_params.get("name", "T-rex"),
-                      taxonomy_class=animal_params.get("taxonomy_class", "Dinsourses"),
-                      taxonomy_order=animal_params.get("taxonomy_order", "Thripods"),
-                      taxonomy_family=animal_params.get("taxonomy_family", "Rex"))
-
-        res = self.client.post(target_url, data=json.dumps(animal), content_type="application/json")
-        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        return res.data
-
-    @override_settings(DEBUG=True)
-    def test_optimized_likes_count(self):
+    def test_get_animals_with_creator_endpoint(self):
         animals = []
-        # Create 1000 animals
-        names = list(range(1, 1000))
+        # Create 1000 animals as a list
+        required_animals_length = 1000
+        names = list(range(0, required_animals_length))
         for name in names:
             animals.append(Animal(
                 name=name,
@@ -94,27 +77,20 @@ class DashBoardTestCase(BaseAPITestCase):
                 taxonomy_family="Rex",
                 creator=self.admin_user,
             ))
+        # Bulk insert bypassing our API
         Animal.objects.bulk_create(animals)
 
-
-        # Add users
-        first_user = self.given_user_exists(username="first_user", email="first@example.com", password="12345")
-        second_user = self.given_user_exists(username="second_user", email="second@example.com", password="12345")
-        third_user = self.given_user_exists(username="third_user", email="third_user@example.com", password="12345")
-
-        # Choose and use one of the animals
-        first_animal_id = 1
-
-        first_animal_like_url = reverse("animals-like", args=[first_animal_id])
-
-        # Add a like with the first user
-        self.given_user_authenticated(first_user.username, "12345")
-        res = self.client.post(first_animal_like_url)
-        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-
-        data_url = reverse("animals-users")
+        data_url = reverse("animals-creators")
         res = self.client.get(data_url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+        data = res.data
+        self.assertEqual(len(data), required_animals_length)
 
-
-
+        # Test the first result to see the structure of the returned data
+        animal = data[0]
+        self.assertEqual(animal.get("name"), "0")
+        self.assertEqual(animal.get('extinction'), "K/t")
+        creator = animal.get("creator")
+        self.assertEqual(creator.get("id"), self.admin_user.id)
+        self.assertEqual(creator.get("username"), self.admin_user.username)
+        self.assertEqual(creator.get("email"), self.admin_user.email)
