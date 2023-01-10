@@ -61,7 +61,7 @@ class UsersViewSerializer(serializers.ModelSerializer):
 class ThinUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
-        fields = ["id", "username"]
+        fields = ["id", "username", "email"]
 
 
 class AnimalUserSerializer(serializers.ModelSerializer):
@@ -69,5 +69,5 @@ class AnimalUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Animal
-        fields = ["id", "name", "creator"]
+        fields = ["id", "name", "extinction", "creator"]
 

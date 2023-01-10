@@ -1,29 +1,16 @@
 import json
-
 from django.urls import reverse
 from django.test.utils import override_settings
 from rest_framework import status
-from rest_framework.test import APITestCase
-
 from fauna.models import Animal
-from fauna.tests.base import given_user_exists, given_user_authenticated, given_user_unauthenticated
+from fauna.tests.base import BaseAPITestCase
 
 
-class DashBoardTestCase(APITestCase):
-    def setUp(self) -> None:
-        self.admin_user = given_user_exists(username="admin_user",
-                                            email="admin@example.com",
-                                            password="12345",
-                                            is_staff=True,
-                                            is_superuser=True)
-        super().setUp()
-
-    def tearDown(self) -> None:
-        super().tearDown()
+class DashBoardTestCase(BaseAPITestCase):
 
     def test_get_animals_with_most_likes(self):
         # Admin login
-        given_user_authenticated(self.client, "admin_user", "12345")
+        self.given_user_authenticated("admin_user", "12345")
         # Create 6 animals
         triceratops = self.when_authenticated_user_creates_animal_via_api(name="Triceratops_123454251")
         archaeopteryx = self.when_authenticated_user_creates_animal_via_api(name="Archaeopteryx")
@@ -34,12 +21,12 @@ class DashBoardTestCase(APITestCase):
         bee = self.when_authenticated_user_creates_animal_via_api(name="bee")
 
         # Admin logout
-        given_user_unauthenticated(self.client)
+        self.given_user_unauthenticated()
 
         # Add users
-        first_user = given_user_exists(username="first_user", email="first@example.com", password="12345")
-        second_user = given_user_exists(username="second_user", email="second@example.com", password="12345")
-        third_user = given_user_exists(username="third_user", email="third_user@example.com", password="12345")
+        first_user = self.given_user_exists(username="first_user", email="first@example.com", password="12345")
+        second_user = self.given_user_exists(username="second_user", email="second@example.com", password="12345")
+        third_user = self.given_user_exists(username="third_user", email="third_user@example.com", password="12345")
 
         # Choose and use one of the animals
         stegosaurus_id = stegosaurus["id"]
@@ -47,17 +34,17 @@ class DashBoardTestCase(APITestCase):
         like_target_url = reverse("animals-like", args=[stegosaurus_id])
 
         # Add a like with the first user
-        given_user_authenticated(self.client, first_user.username, "12345")
+        self.given_user_authenticated(first_user.username, "12345")
         res = self.client.post(like_target_url)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
 
         # Add a like with the second_user
-        given_user_authenticated(self.client, second_user.username, "12345")
+        self.given_user_authenticated(second_user.username, "12345")
         res = self.client.post(like_target_url)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
 
         # Add a like with the third_user
-        given_user_authenticated(self.client, third_user.username, "12345")
+        self.given_user_authenticated(third_user.username, "12345")
         res = self.client.post(like_target_url)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
 
@@ -111,9 +98,9 @@ class DashBoardTestCase(APITestCase):
 
 
         # Add users
-        first_user = given_user_exists(username="first_user", email="first@example.com", password="12345")
-        second_user = given_user_exists(username="second_user", email="second@example.com", password="12345")
-        third_user = given_user_exists(username="third_user", email="third_user@example.com", password="12345")
+        first_user = self.given_user_exists(username="first_user", email="first@example.com", password="12345")
+        second_user = self.given_user_exists(username="second_user", email="second@example.com", password="12345")
+        third_user = self.given_user_exists(username="third_user", email="third_user@example.com", password="12345")
 
         # Choose and use one of the animals
         first_animal_id = 1
@@ -121,7 +108,7 @@ class DashBoardTestCase(APITestCase):
         first_animal_like_url = reverse("animals-like", args=[first_animal_id])
 
         # Add a like with the first user
-        given_user_authenticated(self.client, first_user.username, "12345")
+        self.given_user_authenticated(first_user.username, "12345")
         res = self.client.post(first_animal_like_url)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
 
