@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-
 from fauna.models import Animal
 
 
@@ -56,18 +55,4 @@ class UsersViewSerializer(serializers.ModelSerializer):
 
     def get_how_many_liked(self, obj):
         return obj.animals_liked.count()
-
-
-class ThinUserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = get_user_model()
-        fields = ["id", "username", "email"]
-
-
-class AnimalCreatorSerializer(serializers.ModelSerializer):
-    creator = ThinUserSerializer(many=False, read_only=True)
-
-    class Meta:
-        model = Animal
-        fields = ["id", "name", "extinction", "creator"]
 

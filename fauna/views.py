@@ -14,7 +14,7 @@ from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet, GenericV
 from fauna.models import Animal
 from fauna.permissions import IsCreatorMutatingOrReadOnly, LikePermission
 from fauna.serializers import AnimalSerializer, AnonymousUserAnimalSerializer, UsersViewSerializer, \
-    AnimalCreatorSerializer, AnimalDashBoardSerializer
+    AnimalDashBoardSerializer
 from rest_framework.decorators import action
 
 
@@ -31,8 +31,6 @@ class AnimalViewSet(ModelViewSet):
         serializer_class = super().get_serializer_class()
         if self.action == "dashboard":
             serializer_class = AnimalDashBoardSerializer
-        elif self.action == "creators":
-            serializer_class = AnimalCreatorSerializer
         elif self.request.user.is_authenticated:
             serializer_class = AnimalSerializer
         return serializer_class
@@ -61,16 +59,6 @@ class AnimalViewSet(ModelViewSet):
 
     @action(methods=["GET"], detail=False)
     def dashboard(self, requset):
-        # result = dict(
-        #     animals_count=6,
-        #     avg_name_length=9,
-        #     longest_name="spinosaurus",
-        #     shortest_name="bee",
-        #     most_liked_animal_name="Velociraptor",
-        #     top_3_liked_animals=[dict(
-        #         id, name...
-        #     ), dict(), dict()]
-        # )
         results = Animal.objects.aggregate(
             animals_count=Count("id"),
             avg_name_length=Avg(Length("name")),
@@ -84,11 +72,7 @@ class AnimalViewSet(ModelViewSet):
         serializer = self.get_serializer(results)
         return Response(status=status.HTTP_200_OK, data=serializer.data)
 
-    @action(methods=["GET"], detail=False)
-    def creators(self, request):
-        results = Animal.objects.select_related("creator").all()
-        serializer = self.get_serializer(results, many=True)
-        return Response(status=status.HTTP_200_OK, data=serializer.data)
+    # TODO: create a new action - "creators"
 
 
 class UsersView(mixins.RetrieveModelMixin, GenericViewSet):

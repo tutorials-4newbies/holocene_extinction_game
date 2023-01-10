@@ -63,34 +63,27 @@ class DashBoardTestCase(BaseAPITestCase):
         self.assertEqual(top_animal["id"], stegosaurus["id"])
 
     def test_get_animals_with_creator_endpoint(self):
-        animals = []
-        # Create 1000 animals as a list
-        required_animals_length = 1000
-        names = list(range(0, required_animals_length))
-        for name in names:
-            animals.append(Animal(
-                name=name,
-                period="PERMIAN",
-                extinction="K/t",
-                taxonomy_class="Dinsourses",
-                taxonomy_order="Thripods",
-                taxonomy_family="Rex",
-                creator=self.admin_user,
-            ))
-        # Bulk insert bypassing our API
-        Animal.objects.bulk_create(animals)
+        # TODO: Create lots of animals
+        required_animals_length = 5
 
+        # get the data
         data_url = reverse("animals-creators")
         res = self.client.get(data_url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        data = res.data
-        self.assertEqual(len(data), required_animals_length)
+        self.assertEqual(len(res.data), required_animals_length)
 
-        # Test the first result to see the structure of the returned data
-        animal = data[0]
-        self.assertEqual(animal.get("name"), "0")
-        self.assertEqual(animal.get('extinction'), "K/t")
-        creator = animal.get("creator")
-        self.assertEqual(creator.get("id"), self.admin_user.id)
-        self.assertEqual(creator.get("username"), self.admin_user.username)
-        self.assertEqual(creator.get("email"), self.admin_user.email)
+        # TODO: Test the result to see the structure of the returned data
+        # should be
+        # [
+        #     {
+        #         "id": "animal id",
+        #         "name": "some name",
+        #         "extinction": "ext",
+        #         "creator": {
+        #             "id": "creator id",
+        #             "username": "creator username",
+        #             "email": "creator email",
+        #         }
+        #     }
+        # ]
+
