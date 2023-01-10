@@ -71,11 +71,3 @@ class AnimalCreatorSerializer(serializers.ModelSerializer):
         model = Animal
         fields = ["id", "name", "extinction", "creator"]
 
-
-class AnimalLikesSerializer(serializers.ModelSerializer):
-    likes = ThinUserSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Animal
-        fields = ["id", "name", "extinction", "likes"]
-
