@@ -58,7 +58,7 @@ class AnimalViewSet(ModelViewSet):
         return Response(status=status.HTTP_201_CREATED, data=serializer.data)
 
     @action(methods=["GET"], detail=False)
-    def dashboard(self, requset):
+    def dashboard(self, request):
         #
         # TODO: Need to create a result that will look like this:
         #
