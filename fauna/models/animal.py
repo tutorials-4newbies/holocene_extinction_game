@@ -2,6 +2,8 @@ from django.conf import settings
 from django.db import models
 from django.db.models import CASCADE
 
+from fauna.models.animal_stats import AnimalStats
+
 
 class Animal(models.Model):
     class Meta:
@@ -34,3 +36,14 @@ class Animal(models.Model):
     def likes_count(self) -> int:
         # Optimization issue lurking here... we'll get back to that
         return self.likes.all().count()
+
+    def save(
+        self, *args, **kwargs
+    ):
+        should_create_stats = False
+        if not self.pk: # it's new
+            should_create_stats = True
+        res =  super().save(*args, **kwargs)
+        if should_create_stats:
+            AnimalStats.objects.create(animal=self)
+        return res

@@ -47,7 +47,7 @@ services:
         print('Superuser password updated successfully.')
         000
         cp /srv/app/static/* -r /static/
-        gunicorn holocene_extinction_game.wsgi --timeout 180 --bind 0.0.0.0
+        gunicorn holocene_extinction_game.wsgi --timeout 180 --bind 0.0.0.0 --reload
 
     volumes:
       - ./data/static:/static

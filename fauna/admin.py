@@ -4,8 +4,9 @@ from django.contrib.auth.models import User
 from import_export.admin import ImportExportModelAdmin
 
 # Register your models here.
-from fauna.models import Animal
+from fauna.models import Animal, AnimalStats
 from django.conf import settings
+
 
 class UserLikes(admin.TabularInline):
     model = Animal.likes.through
@@ -13,8 +14,10 @@ class UserLikes(admin.TabularInline):
     can_delete = False
     show_change_link = True
 
+
 class UserCreated(admin.TabularInline):
     model = get_user_model()
+
 
 class AnimalAdmin(ImportExportModelAdmin):
     list_display = ['name', 'extinction', 'period', 'taxonomy_class', 'taxonomy_class', 'taxonomy_family']
@@ -30,7 +33,7 @@ class AnimalAdmin(ImportExportModelAdmin):
     ]
 
     def get_queryset(self, request):
-        qs = super().get_queryset(request=request)
+        qs = super().get_queryset(request=request).select_related("stats")
         if hasattr(settings, "ACCEPTED_PERIOD"):
             qs = qs.filter(period=settings.ACCEPTED_PERIOD)
         return qs
@@ -46,4 +49,10 @@ class AnimalAdmin(ImportExportModelAdmin):
         if changed:
             self.message_user(request=request, message="promoted!", level=messages.WARNING)
 
+
+class AnimalStatsAdmin(ImportExportModelAdmin):
+    fields = ("animal__name",)
+
+
 admin.site.register(Animal, AnimalAdmin)
+admin.site.register(AnimalStats, AnimalStatsAdmin)
