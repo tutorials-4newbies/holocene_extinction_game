@@ -7,7 +7,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from fauna.models import Animal
+from fauna.models.animal import Animal
 
 
 # Create your tests here.

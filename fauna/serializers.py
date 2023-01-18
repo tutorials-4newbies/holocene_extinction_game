@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from fauna.models import Animal
+from fauna.models.animal import Animal
 
 class AnonymousUserAnimalSerializer(serializers.ModelSerializer):
     is_liked = serializers.SerializerMethodField(method_name="get_is_liked")

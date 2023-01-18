@@ -1,11 +1,13 @@
 from django.contrib import admin, messages
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import User
 from import_export.admin import ImportExportModelAdmin
 
 # Register your models here.
-from fauna.models import Animal
 from django.conf import settings
+
+from fauna.models import Profile, AnimalStats
+from fauna.models.animal import Animal
+
 
 class UserLikes(admin.TabularInline):
     model = Animal.likes.through
@@ -13,8 +15,10 @@ class UserLikes(admin.TabularInline):
     can_delete = False
     show_change_link = True
 
+
 class UserCreated(admin.TabularInline):
     model = get_user_model()
+
 
 class AnimalAdmin(ImportExportModelAdmin):
     list_display = ['name', 'extinction', 'period', 'taxonomy_class', 'taxonomy_class', 'taxonomy_family']
@@ -46,4 +50,15 @@ class AnimalAdmin(ImportExportModelAdmin):
         if changed:
             self.message_user(request=request, message="promoted!", level=messages.WARNING)
 
+
+class ProfileAdmin(ImportExportModelAdmin):
+    fields = ("user", )
+
+
+class AnimalStatsAdmin(ImportExportModelAdmin):
+    fields = ("animal", "is_loved")
+
+
 admin.site.register(Animal, AnimalAdmin)
+admin.site.register(Profile, ProfileAdmin)
+admin.site.register(AnimalStats, AnimalStatsAdmin)

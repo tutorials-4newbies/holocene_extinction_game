@@ -9,7 +9,7 @@ from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet, GenericViewSet
 # Create your views here.
-from fauna.models import Animal
+from fauna.models.animal import Animal
 from fauna.permissions import IsCreatorMutatingOrReadOnly, LikePermission
 from fauna.serializers import AnimalSerializer, AnonymousUserAnimalSerializer, UsersViewSerializer
 from rest_framework.decorators import action
