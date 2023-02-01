@@ -7,7 +7,6 @@ class Command(BaseCommand):
     help = "Kathulu sleeps under the see"
 
     def add_arguments(self, parser):
-        #  POSITIONAL argument
         parser.add_argument("-c", "--color", help="Add some color to life", default="green")
         parser.add_argument("-m", "--meister", action="store_true", default=False)
         parser.add_argument("--ids", nargs="+", type=int)
