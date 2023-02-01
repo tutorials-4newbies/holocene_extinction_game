@@ -8,10 +8,19 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         #  POSITIONAL argument
-        parser.add_argument("wish", help="what he would wish to do", type=str)
         parser.add_argument("-c", "--color", help="Add some color to life", default="green")
+        parser.add_argument("-m", "--meister", action="store_true", default=False)
+        parser.add_argument("--ids", nargs="+", type=int)
 
     def handle(self, *args, **kwargs):
         extinct_animals = Animal.objects.all()
         for animal in extinct_animals:
             self.stdout.write(f"He has awaken {animal.name} in order to {kwargs.get('wish')} and might paint him in {kwargs.get('color')}")
+            if kwargs.get("meister"):
+                self.stdout.write(f"going to resurrect {animal.name}")
+                animal.its_alive = True
+                animal.save()
+
+        for an_id in kwargs.get("ids"):
+            self.stdout.write(f"{an_id}")
+
