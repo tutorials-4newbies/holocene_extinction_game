@@ -14,11 +14,7 @@ from fauna.tests.base import BaseTestCase
 
 class ResurrectionTestCase(BaseTestCase):
     def setUp(self) -> None:
-        self.admin_user = self.given_user_exists(username="admin_user",
-                                                 email="admin@example.com",
-                                                 password="12345",
-                                                 is_staff=True,
-                                                 is_superuser=True)
+
         super().setUp()
 
     def tearDown(self) -> None:

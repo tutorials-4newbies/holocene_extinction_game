@@ -6,4 +6,4 @@ class AnimalManager(models.Manager):
         return super().get_queryset().filter(is_deactivated=False)
 
     def with_likes(self):
-        return self.annotate(count=models.Count("likes"))
+        return self.prefetch_related("likes").annotate(count=models.Count("likes"))
