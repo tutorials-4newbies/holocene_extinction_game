@@ -15,7 +15,6 @@ from fauna.serializers import AnimalSerializer, AnonymousUserAnimalSerializer, U
 from rest_framework.decorators import action
 
 
-
 class AnimalViewSet(ModelViewSet):
     queryset = Animal.objects.all()
     permission_classes = [IsCreatorMutatingOrReadOnly]
@@ -31,7 +30,8 @@ class AnimalViewSet(ModelViewSet):
             serializer_class = AnimalSerializer
         return serializer_class
 
-
+    def get_queryset(self):
+        return super().get_queryset()
 
     def create(self, request, *args, **kwargs):
         data = copy.deepcopy(request.data)
@@ -48,15 +48,15 @@ class AnimalViewSet(ModelViewSet):
         /animals/pk(1)/like
         """
         # get the animal
-        animal:Animal = self.get_object()
+        animal: Animal = self.get_object()
         animal.likes.add(request.user)
         # add a like and save
         # return the animal
         serializer = self.get_serializer(animal)
         return Response(status=status.HTTP_201_CREATED, data=serializer.data)
 
+
 class UsersView(mixins.RetrieveModelMixin, GenericViewSet):
     queryset = get_user_model().objects.all()
     permission_classes = [AllowAny]
     serializer_class = UsersViewSerializer
-
