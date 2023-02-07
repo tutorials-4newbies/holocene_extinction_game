@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import render
 from rest_framework import mixins, status
-from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet, GenericViewSet
@@ -30,9 +30,6 @@ class AnimalViewSet(ModelViewSet):
             serializer_class = AnimalSerializer
         return serializer_class
 
-    def get_queryset(self):
-        return super().get_queryset()
-
     def create(self, request, *args, **kwargs):
         data = copy.deepcopy(request.data)
         data["creator"] = request.user.id
@@ -54,6 +51,19 @@ class AnimalViewSet(ModelViewSet):
         # return the animal
         serializer = self.get_serializer(animal)
         return Response(status=status.HTTP_201_CREATED, data=serializer.data)
+
+    @action(methods=["POST"], detail=True, permission_classes=[IsAuthenticated])
+    def deactivate(self, request, pk=None):
+        """
+        /animals/pk(1)/deactivate
+        """
+        animal: Animal = self.get_object()
+        animal.deactivate()
+        # add a like and save
+        # return the animal
+        serializer = self.get_serializer(animal)
+        return Response(status=status.HTTP_201_CREATED, data=serializer.data)
+
 
 
 class UsersView(mixins.RetrieveModelMixin, GenericViewSet):

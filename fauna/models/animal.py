@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db import models
 from django.db.models import CASCADE
 
+from fauna.managers import AnimalManager
 from fauna.models.animal_stats import AnimalStats
 
 
@@ -31,6 +32,7 @@ class Animal(models.Model):
     likes = models.ManyToManyField(to=settings.AUTH_USER_MODEL, related_name="animals_liked")
     its_alive = models.BooleanField(default=False)
     is_deactivated = models.BooleanField(default=False)
+    objects = AnimalManager()
 
     def __str__(self):
         return f"{self.name} of {self.taxonomy_family}"
@@ -39,6 +41,10 @@ class Animal(models.Model):
     def likes_count(self) -> int:
         # Optimization issue lurking here... we'll get back to that
         return self.likes.all().count()
+
+    def deactivate(self):
+        self.is_deactivated = True
+        self.save()
 
     def save(
             self, force_insert=False, force_update=False, using=None, update_fields=None
