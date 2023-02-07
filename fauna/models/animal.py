@@ -29,6 +29,7 @@ class Animal(models.Model):
                                 related_name="animals_created")  # ONE TO MANY
     picture = models.FileField(upload_to="fauna/animals/", null=True, blank=True)
     likes = models.ManyToManyField(to=settings.AUTH_USER_MODEL, related_name="animals_liked", null=True, blank=True)
+    its_alive = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.name} of {self.taxonomy_family}"
