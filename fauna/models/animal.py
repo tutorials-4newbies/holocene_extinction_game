@@ -28,7 +28,7 @@ class Animal(models.Model):
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, blank=False, null=False, on_delete=CASCADE,
                                 related_name="animals_created")  # ONE TO MANY
     picture = models.FileField(upload_to="fauna/animals/", null=True, blank=True)
-    likes = models.ManyToManyField(to=settings.AUTH_USER_MODEL, related_name="animals_liked", null=True, blank=True)
+    likes = models.ManyToManyField(to=settings.AUTH_USER_MODEL, related_name="animals_liked")
     its_alive = models.BooleanField(default=False)
 
     def __str__(self):
