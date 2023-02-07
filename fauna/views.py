@@ -4,10 +4,10 @@ from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import render
 from rest_framework import mixins, status
-from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
-from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet, GenericViewSet
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
 # Create your views here.
 from fauna.models.animal import Animal
 from fauna.permissions import IsCreatorMutatingOrReadOnly, LikePermission
@@ -16,7 +16,7 @@ from rest_framework.decorators import action
 
 
 class AnimalViewSet(ModelViewSet):
-    queryset = Animal.objects.all()
+    queryset = Animal.objects.with_likes()
     permission_classes = [IsCreatorMutatingOrReadOnly]
     serializer_class = AnonymousUserAnimalSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter]
