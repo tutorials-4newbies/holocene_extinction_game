@@ -14,7 +14,7 @@ class Command(BaseCommand):
         self.stdout.write("The dead would rise")
         if options.get("god_mode"):
             self.stdout.write("Do something dangerous")
-            dead_animals = Animal.objects.filter(its_alive=False)
+            dead_animals = Animal.all.filter(its_alive=False)
 
             dead_animals.update(its_alive=True)
 

@@ -1,6 +1,7 @@
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.response import Response
+from configurations.management import call_command
 
 from fauna.models import Animal
 from fauna.tests.base import BaseTestCase
@@ -37,6 +38,11 @@ class AnimalDeactivatedViewTestCase(BaseTestCase):
         admin_res = self.client.get(admin_target_url)
         self.assertOkResponse(res)
         self.assertEqual(len(admin_res.context_data["cl"].result_list), 0)
+
+        res = call_command("resurrect", "--god_mode")
+
+        res = self.client.get(target_url)
+        self.assertEqual(res.data["count"], 1)
 
     def when_animal_is_deactivated(self, animal_id: int):
         target_url = reverse("animals-deactivate", args=[animal_id])
