@@ -8,6 +8,7 @@ from fauna.models.animal_stats import AnimalStats
 
 class Animal(models.Model):
     class Meta:
+        default_manager_name = "objects"
         ordering = ['name']
 
     PERIOD_CHOICES = [
@@ -32,7 +33,8 @@ class Animal(models.Model):
     likes = models.ManyToManyField(to=settings.AUTH_USER_MODEL, related_name="animals_liked")
     its_alive = models.BooleanField(default=False)
     is_deactivated = models.BooleanField(default=False)
-    objects = AnimalManager()
+    objects = AnimalManager() # note about related
+    all = models.Manager()
 
     def __str__(self):
         return f"{self.name} of {self.taxonomy_family}"
