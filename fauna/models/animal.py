@@ -2,11 +2,13 @@ from django.conf import settings
 from django.db import models
 from django.db.models import CASCADE
 
+from fauna.managers import AnimalManager, AnimalFullManager
 from fauna.models.animal_stats import AnimalStats
 
 
 class Animal(models.Model):
     class Meta:
+        base_manager_name = "objects"
         ordering = ['name']
 
     PERIOD_CHOICES = [
@@ -32,6 +34,11 @@ class Animal(models.Model):
     its_alive = models.BooleanField(default=False)
     is_deactivated = models.BooleanField(default=False)
 
+    objects = AnimalManager()
+
+    unfiltered = AnimalFullManager()
+
+
     def __str__(self):
         return f"{self.name} of {self.taxonomy_family}"
 
@@ -39,6 +46,10 @@ class Animal(models.Model):
     def likes_count(self) -> int:
         # Optimization issue lurking here... we'll get back to that
         return self.likes.all().count()
+
+    def deactivate(self):
+        self.is_deactivated = True
+        self.save()
 
     def save(
             self, force_insert=False, force_update=False, using=None, update_fields=None
